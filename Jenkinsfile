@@ -8,7 +8,7 @@ pipeline {
     stage('Build deps image') {
       steps {
         dir('docker/dependencies') {
-          sh 'docker build -t daniel/dependencies:1.0 .'
+          sh 'docker build -t dslwa525/dependencies:1.0 .'
         }
       }
     }
@@ -16,7 +16,7 @@ pipeline {
     stage('Compile & Test') {
       agent {
         docker {
-          image 'daniel/dependencies:1.0'
+          image 'dslwa525/dependencies:1.0'
           args  '--privileged -u root -v /var/run/docker.sock:/var/run/docker.sock'
         }
       }

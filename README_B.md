@@ -1,5 +1,4 @@
 # This project demonstrates an automated process for building, testing, and deploying a Snake application in Go using Jenkins and Docker containers.
-#  Projekt ten demonstruje zautomatyzowany proces tworzenia, testowania i wdrażania aplikacji Snake w języku Go przy użyciu narzędzia Jenkins i kontenerów Docker.
 
 # How to run
 1. git clone https://github.com/dslwa/snake-game.git
@@ -36,7 +35,7 @@
 * Install Jenkins (e.g. as a Docker container).
 * Make sure that Jenkins is running e.g. on http://localhost:8082.
 * Configure a new pipeline:
-* Source: https://github.com/Rafallost/snake-game.git
+* Source: https://github.com/dslwa/snake-game.git
 * Branch: master
 * Pipeline file: Jenkinsfile.B
 * Make sure that Jenkins has access to Docker (e.g. runs in a container with docker.sock).

@@ -16,7 +16,7 @@
 6. firefox http://localhost:8082
 
 # To run game docker
-* docker run -ti rafal206/snake-game
+* docker run -ti dslwa525/snake-game
 
 # Project Structure
 * Dockerfile.build – an image to build the application

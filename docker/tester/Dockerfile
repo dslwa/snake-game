@@ -1,4 +1,4 @@
-FROM daniel/dependencies:1.0
+FROM dslwa525/dependencies:1.0
 WORKDIR /workspace
 
 # Copy everything

@@ -19,7 +19,7 @@ Below structure is only for DND
 1. Prerequisites: Install Docker and Docker Compose.
 2. Build Dependencies image:
     * cd docker/dependencies
-    * docker build -t rafal206/dependencies:1.0 .
+    * docker build -t dslwa525/dependencies:1.0 .
 3. Start Jenkins + DIND:
     * cd docker/jenkins
     * docker-compose up -d
@@ -33,35 +33,3 @@ Below structure is only for DND
     * Point SCM to your repository and set Jenkinsfile-2 as the pipeline script.
     * Run the job. it will build, test, and push Docker images.
 
-For the more informaction, read rest of the READMEs
-
-# ---------------------- Legacy part ----------------------
-# Snake Game
-
-[![Build Status](https://travis-ci.org/DyegoCosta/snake-game.svg?branch=master)](https://travis-ci.org/DyegoCosta/snake-game)
-
-Terminal-based Snake game
-
-![scrrenshot](http://i.imgur.com/pHf4fjt.gif)
-
-## Play
-
-### Locally
-
-```
-$ go get github.com/DyegoCosta/snake-game
-$ $GOPATH/bin/snake-game
-```
-
-### On Docker
-
-```
-$ docker run -ti dyego/snake-game
-```
-
-## Testing
-
-```
-$ cd $GOPATH/src/github.com/DyegoCosta/snake-game
-$ make
-```

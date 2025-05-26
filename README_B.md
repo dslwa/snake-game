@@ -23,7 +23,7 @@
 * Dockerfile.deploy – an image to deploy the application
 * Dockerfile.smoke – an image to test smoke tests
 * docker-compose.yml – a definition of Docker services
-* Jenkinsfile.B – a CI/CD pipeline in Jenkins
+* Jenkinsfile – a CI/CD pipeline in Jenkins
 
 # Requirements
 * Docker

@@ -1,39 +1,66 @@
 pipeline {
-  agent any
-  environment {
-    DOCKER_HOST        = 'tcp://dind:2375'
-    DOCKER_TLS_CERTDIR = ''
-  }
-  stages {
-    stage('Build deps image') {
-      steps {
-        dir('docker/dependencies') {
-          sh 'docker build -t rafal206/dependencies:1.0 .'
-        }
-      }
-    }
-
-    stage('Compile & Test') {
-      agent {
+    agent {
         docker {
-          image 'rafal206/dependencies:1.0'
-          args  '--privileged -u root -v /var/run/dockeSr.sock:/var/run/docker.sock'
+            image 'golang:alpine'
+            args '-v /var/run/docker.sock:/var/run/docker.sock'
         }
-      }
-    steps {
-
-      sh 'mkdir -p output'
-      sh 'make build > output/build.log 2>&1 || true'
-      sh 'make test  > output/test.log  2>&1 || true'
-
-      archiveArtifacts artifacts: 'output/build.log,output/test.log', fingerprint: true
     }
-    }
-  }
 
-  post {
-    always {
-      echo "End of pipeline, artifacts and image available"
+    environment {
+        OUTPUT_DIR = 'output'
     }
-  }
+
+    stages {
+        stage('Start Trigger') {
+            steps {
+                echo "Rozpoczęcie pipeline – Build #${env.BUILD_NUMBER}"
+            }
+        }
+
+        stage('Prepare Env') {
+            steps {
+                sh '''
+                    apk add --no-cache git make
+                    mkdir -p ${OUTPUT_DIR}
+                '''
+            }
+        }
+
+        stage('Build') {
+            steps {
+                sh '''
+                    echo "=== BUILD START ===" > ${OUTPUT_DIR}/build_log.log
+                    make build >> ${OUTPUT_DIR}/build_log.log 2>&1 || echo "Błąd w buildzie!" >> ${OUTPUT_DIR}/build_log.log
+                    echo "=== BUILD END ===" >> ${OUTPUT_DIR}/build_log.log
+                    cat ${OUTPUT_DIR}/build_log.log || true
+                '''
+            }
+        }
+
+        stage('Test') {
+            steps {
+                sh '''
+                    echo "=== TEST START ===" > ${OUTPUT_DIR}/test_log.log
+                    make test >> ${OUTPUT_DIR}/test_log.log 2>&1 || echo "Błąd w testach!" >> ${OUTPUT_DIR}/test_log.log
+                    echo "=== TEST END ===" >> ${OUTPUT_DIR}/test_log.log
+                    cat ${OUTPUT_DIR}/test_log.log || true
+                '''
+            }
+        }
+
+        stage('Save Logs') {
+            steps {
+                archiveArtifacts artifacts: "${OUTPUT_DIR}/*.log", fingerprint: true
+            }
+        }
+    }
+
+    post {
+        always {
+            echo "Build zakończony – logi dostępne jako artefakt"
+        }
+        cleanup {
+            sh "rm -rf ${OUTPUT_DIR} || true"
+        }
+    }
 }

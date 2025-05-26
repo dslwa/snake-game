@@ -2,49 +2,35 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = 'rafal206/snake-game'
-        IMAGE_TAG = 'v1.0.3'
+        IMAGE_NAME = 'dslwa525/snake-game'
+        IMAGE_TAG = 'v1.0.0'
     }
 
     stages {
         stage('Clone') {
             steps {
-                git branch: 'master', url: 'https://github.com/Rafallost/snake-game.git'
+                git branch: 'master', url: 'https://github.com/dslwa/snake-game.git'
             }
         }
 
-        stage('Build container') {
+        stage('Build Image') {
             steps {
-                sh 'docker build -t snake-build -f Dockerfile.build .'
-                sh 'docker tag snake-build snake-game-build:latest'
-                sh 'docker logs $(docker create snake-build) > build_logs.log || true'
-                sh 'docker cp $(docker create snake-build):/app/build.log ./build.log'
-                archiveArtifacts artifacts: 'build.log', fingerprint: true
+                sh 'docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .'
             }
         }
 
-        stage('Test container') {
+        stage('Run Tests') {
             steps {
-                sh 'docker build -t snake-test -f Dockerfile.test .'
-                sh 'docker run --rm snake-test > test_logs.log || true'
-                sh 'docker cp $(docker create snake-test):/app/test_results.txt ./test_logs.log'
-                archiveArtifacts artifacts: 'test_logs.log'
+                sh 'docker run --rm ${IMAGE_NAME}:${IMAGE_TAG} python3 -m unittest || true'
             }
         }
 
-        stage('Build deploy image') {
-            steps {
-                sh 'docker build -t snake-deploy -f Dockerfile.deploy .'
-                sh 'docker tag snake-deploy ${IMAGE_NAME}:${IMAGE_TAG}'
-            }
-        }
-        stage('Smoke test') {
+        stage('Smoke Test') {
             steps {
                 script {
-                    sh 'docker build -t snake-smoke -f Dockerfile.smoke .'
-                    def containerId = sh(script: 'docker run -d snake-smoke', returnStdout: true).trim()
+                    def containerId = sh(script: "docker run -d ${IMAGE_NAME}:${IMAGE_TAG}", returnStdout: true).trim()
                     sleep(time: 3, unit: 'SECONDS')
-                    sh "docker cp ${containerId}:/app/smoke.log ./smoke.log || true"
+                    sh "docker logs ${containerId} > smoke.log || true"
                     sh "docker rm -f ${containerId} || true"
                 }
                 archiveArtifacts artifacts: 'smoke.log'
@@ -60,4 +46,11 @@ pipeline {
             }
         }
     }
+
+    post {
+        always {
+            echo 'Pipeline zakończony!'
+        }
+    }
 }
+

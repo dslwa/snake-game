@@ -1,61 +1,39 @@
 pipeline {
-    agent {
+  agent any
+  environment {
+    DOCKER_HOST        = 'tcp://dind:2375'
+    DOCKER_TLS_CERTDIR = ''
+  }
+  stages {
+    stage('Build deps image') {
+      steps {
+        dir('docker/dependencies') {
+          sh 'docker build -t rafal206/dependencies:1.0 .'
+        }
+      }
+    }
+
+    stage('Compile & Test') {
+      agent {
         docker {
-            image 'golang:alpine'
-            args '-v /var/run/docker.sock:/var/run/docker.sock'
+          image 'rafal206/dependencies:1.0'
+          args  '--privileged -u root -v /var/run/dockeSr.sock:/var/run/docker.sock'
         }
+      }
+    steps {
+
+      sh 'mkdir -p output'
+      sh 'make build > output/build.log 2>&1 || true'
+      sh 'make test  > output/test.log  2>&1 || true'
+
+      archiveArtifacts artifacts: 'output/build.log,output/test.log', fingerprint: true
     }
-
-    stages {
-        stage('Start Trigger') {
-            steps {
-                echo "Rozpoczęcie pipeline – Build #${env.BUILD_NUMBER}"
-            }
-        }
-
-        stage('Prepare Env') {
-            steps {
-                sh '''
-                    apk add --no-cache git make
-                    mkdir -p output
-                '''
-            }
-        }
-
-        stage('Build') {
-            steps {
-                sh '''
-                    mkdir -p output
-                    echo "=== BUILD START ===" > output/build_log.log
-                    make build >> output/build_log.log 2>&1
-                    echo "=== BUILD END ===" >> output/build_log.log
-                    cat output/build_log.log || true
-                '''
-            }
-        }
-        stage('Test') {
-            steps {
-                sh '''
-                    echo "=== TEST START ===" > output/test_log.log
-                    make test >> output/test_log.log 2>&1
-                    echo "=== TEST END ===" >> output/test_log.log
-                    ls -lh output/
-                    
-                    cat output/test_log.log || true
-                '''
-            }
-        }
-
-        stage('Save Logs') {
-            steps {
-                archiveArtifacts artifacts: 'output/*.log', fingerprint: true
-            }
-        }
     }
+  }
 
-    post {
-        always {
-            echo "Build zakończony – logi dostępne jako artefakt"
-        }
+  post {
+    always {
+      echo "End of pipeline, artifacts and image available"
     }
+  }
 }

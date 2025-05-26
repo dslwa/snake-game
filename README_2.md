@@ -1,5 +1,3 @@
-# This project demonstrates an automated process for building, testing, and deploying a Snake application in Go using Jenkins and Docker containers.
-
 # How to run
 1. git clone https://github.com/dslwa/snake-game.git
 2. cd snake-game

@@ -2,7 +2,7 @@
 #  Projekt ten demonstruje zautomatyzowany proces tworzenia, testowania i wdrażania aplikacji Snake w języku Go przy użyciu narzędzia Jenkins i kontenerów Docker.
 
 # How to run
-1. git clone https://github.com/Rafallost/snake-game.git
+1. git clone https://github.com/dslwa/snake-game.git
 2. cd snake-game
 3. docker compose build
 4. docker compose up
@@ -56,7 +56,7 @@
 * smoke.log – (if configured) smoke test results
 
 # publish
-* docker pull rafal206/snake-game:v1.0.0
+* docker pull dslwa525/snake-game:v1.0.0
 
 # License
 * The application code comes from a public repository:

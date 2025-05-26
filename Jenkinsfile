@@ -1,9 +1,9 @@
 pipeline {
-    agent any
-
-    environment {
-        WORKDIR = 'GR3/DS415335/Lab03'
-        OUTPUT_DIR = 'output'
+    agent {
+        docker {
+            image 'golang:alpine'
+            args '-v /var/run/docker.sock:/var/run/docker.sock'
+        }
     }
 
     stages {
@@ -13,59 +13,49 @@ pipeline {
             }
         }
 
-        stage('Prepare Environment') {
+        stage('Prepare Env') {
             steps {
                 sh '''
-                    apt-get update
-                    apt-get install -y git make golang
+                    apk add --no-cache git make
+                    mkdir -p output
                 '''
             }
         }
 
         stage('Build') {
             steps {
-                dir("${WORKDIR}") {
-                    sh '''
-                        mkdir -p ${OUTPUT_DIR}
-                        echo "=== BUILD START ===" > ${OUTPUT_DIR}/build_log.log
-                        make build >> ${OUTPUT_DIR}/build_log.log 2>&1 || echo "Błąd w buildzie!"
-                        echo "=== BUILD END ===" >> ${OUTPUT_DIR}/build_log.log
-                        cat ${OUTPUT_DIR}/build_log.log
-                    '''
-                }
+                sh '''
+                    mkdir -p output
+                    echo "=== BUILD START ===" > output/build_log.log
+                    make build >> output/build_log.log 2>&1
+                    echo "=== BUILD END ===" >> output/build_log.log
+                    cat output/build_log.log || true
+                '''
             }
         }
-
         stage('Test') {
             steps {
-                dir("${WORKDIR}") {
-                    sh '''
-                        echo "=== TEST START ===" > ${OUTPUT_DIR}/test_log.log
-                        make test >> ${OUTPUT_DIR}/test_log.log 2>&1 || echo "Błąd w testach!"
-                        echo "=== TEST END ===" >> ${OUTPUT_DIR}/test_log.log
-                        cat ${OUTPUT_DIR}/test_log.log
-                    '''
-                }
+                sh '''
+                    echo "=== TEST START ===" > output/test_log.log
+                    make test >> output/test_log.log 2>&1
+                    echo "=== TEST END ===" >> output/test_log.log
+                    ls -lh output/
+                    
+                    cat output/test_log.log || true
+                '''
             }
         }
 
-        stage('Archive Logs') {
+        stage('Save Logs') {
             steps {
-                dir("${WORKDIR}") {
-                    archiveArtifacts artifacts: "${OUTPUT_DIR}/*.log", fingerprint: true
-                }
+                archiveArtifacts artifacts: 'output/*.log', fingerprint: true
             }
         }
     }
 
     post {
         always {
-            echo "Pipeline zakończony – logi dostępne jako artefakty."
-        }
-        cleanup {
-            dir("${WORKDIR}") {
-                sh "rm -rf ${OUTPUT_DIR} || true"
-            }
+            echo "Build zakończony – logi dostępne jako artefakt"
         }
     }
 }

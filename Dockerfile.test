@@ -1,0 +1,5 @@
+FROM snake-build as builder
+
+WORKDIR /app
+RUN go test -v ./... > test_results.txt
+CMD ["cat", "test_results.txt"]

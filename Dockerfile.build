@@ -1,0 +1,8 @@
+FROM golang:1.20-alpine
+
+WORKDIR /app
+COPY . .
+
+RUN go mod tidy && go build -v -o snake_bin . > build.log 2>&1
+
+CMD ["cat", "build.log"]

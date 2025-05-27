@@ -4,7 +4,7 @@
 * Set GOCACHE and GOFLAGS="-buildvcs=false" for faster builds
 
 # Local build
-`docker build -t rafal206/dependencies:1.0 .`
+`docker build -t dslwa525/dependencies:1.0 .`
 
 # Docker push
-`docker push rafal206/dependencies:1.0`
+`docker push dslwa525/dependencies:1.0`
